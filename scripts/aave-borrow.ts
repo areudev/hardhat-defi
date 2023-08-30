@@ -1,6 +1,7 @@
 import {ethers, network} from 'hardhat'
 import {getWeth, AMOUNT} from './get-weth'
 import {Signer} from 'ethers'
+import {IPool} from '../typechain-types'
 
 async function getPool(account: Signer) {
   const poolAddressesProvider = await ethers.getContractAt(
@@ -31,6 +32,28 @@ async function apporveErc20(
 
   console.log('Approved!')
 }
+
+async function getBorrowUserData(pool: IPool, account: Signer) {
+  const {totalCollateralBase, totalDebtBase, availableBorrowsBase} =
+    await pool.getUserAccountData(account)
+  console.log(
+    `You have ${ethers.formatEther(totalCollateralBase)} ETH as collateral`,
+  )
+  console.log(`You have ${ethers.formatEther(totalDebtBase)} ETH as debt`)
+  console.log(`You can borrow ${ethers.formatEther(availableBorrowsBase)} ETH`)
+
+  return {totalCollateralBase, totalDebtBase, availableBorrowsBase}
+}
+
+async function getDaiPrice() {
+  const daiEthPriceFeed = await ethers.getContractAt(
+    'AggregatorV3Interface',
+    '0x773616E4d11A78F511299002da57A0a94577F1f4',
+  )
+  const [, price] = await daiEthPriceFeed.latestRoundData()
+  return price
+}
+
 async function main() {
   await getWeth()
   const accounts = await ethers.getSigners()
@@ -46,6 +69,14 @@ async function main() {
 
   await pool.deposit(wethTokenAddress, AMOUNT, deployer.address, 0)
   console.log('Deposited!')
+
+  let {totalDebtBase, availableBorrowsBase} = await getBorrowUserData(
+    pool,
+    deployer,
+  )
+
+  const daiPrice = await getDaiPrice()
+  console.log('daiPrice', daiPrice.toString())
 }
 
 main().catch(error => {
