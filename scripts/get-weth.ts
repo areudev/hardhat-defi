@@ -1,13 +1,17 @@
 import {ethers, network} from 'hardhat'
-import {IWeth} from '../typechain-types'
+
+const AMOUNT = ethers.parseEther('10')
 async function getWeth() {
   // 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
   // const deployer = (await ethers.getSigners())[0]
   const accounts = await ethers.getSigners()
-  console.log('accounts', accounts)
+  // console.log(
+  //   'accounts addresses and money',
+  //   accounts.map(a => a.address),
+  // )
 
   const deployer = accounts[0]
-  console.log('deployer', deployer.address)
+  // console.log('deployer', deployer.address)
 
   const iWeth = await ethers.getContractAt(
     'IWeth',
@@ -15,7 +19,7 @@ async function getWeth() {
   )
 
   const tx = await iWeth.deposit({
-    value: ethers.parseEther('0.1'),
+    value: AMOUNT,
   })
   await tx.wait(1)
 
@@ -23,4 +27,4 @@ async function getWeth() {
   console.log('wethBalance', ethers.formatEther(wethBalance))
 }
 
-export {getWeth}
+export {getWeth, AMOUNT}
