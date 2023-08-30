@@ -1,11 +1,16 @@
 import {ethers, network} from 'hardhat'
+import {IWeth} from '../typechain-types'
 async function getWeth() {
   // 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
-  const deployer = (await ethers.getSigners())[0]
+  // const deployer = (await ethers.getSigners())[0]
+  const accounts = await ethers.getSigners()
+  console.log('accounts', accounts)
+
+  const deployer = accounts[0]
   console.log('deployer', deployer.address)
 
   const iWeth = await ethers.getContractAt(
-    'IWETH',
+    'IWeth',
     '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
   )
 
